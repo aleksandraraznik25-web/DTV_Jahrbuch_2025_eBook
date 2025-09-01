@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DTV_Jahrbuch 2025_eBook (Offline-Viewer)</title>
+<style>
+  :root {
+    --bg:#0f0f10; --fg:#eaeaea; --muted:#a0a0a0; --panel:#161617; --accent:#4aa3ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background: #151515; border-bottom: 1px solid #232323; padding: 10px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  header h1 { font-size: 16px; margin: 0; font-weight: 600; }
+  .stage-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 8px; }
+  .stage {
+    flex: 1; background: #000; display: grid; place-items: center; border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.45); padding: 6px;
+  }
+  .book {
+    width: min(96vw, 1400px); height: calc(min(96vw, 1400px) * 0.707);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #000; padding: 6px;
+    border-radius: 4px;
+  }
+  .page { width: 100%; height: 100%; display: grid; place-items: center; overflow: hidden; background: #000; }
+  .page img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .single .book { grid-template-columns: 1fr; }
+  .controls { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 4px; }
+  button {
+    border: 1px solid #333; background: #1c1c1c; color: var(--fg);
+    padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 14px;
+  }
+  button:hover { background: #262626; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .thumbs { display: flex; gap: 6px; overflow-x: auto; padding: 8px; background:#0b0b0c; border-top: 1px solid #232323; }
+  .thumbs img { height: 80px; border-radius: 4px; cursor: pointer; opacity: .85; border: 2px solid transparent; }
+  .thumbs img.active { opacity: 1; border-color: var(--accent); }
+  .help { color: var(--muted); font-size: 12px; text-align: center; padding: 6px 0 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DTV_Jahrbuch 2025_eBook</h1>
+  <div class="meta" id="info">Seite 1 / 140</div>
+</header>
+
+<div class="stage-wrap">
+  <div class="stage single" id="stage">
+    <div class="book" id="book">
+      <div class="page"><img id="img-left" alt="Seite 1" src="pages/page_0001.jpg"></div>
+      <div class="page" id="right-slot" style="display:none"><img id="img-right" alt="" src=""></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="prev">◀︎ Zurück</button>
+    <button id="next">▶︎ Weiter</button>
+  </div>
+</div>
+
+<div class="thumbs" id="thumbs"></div>
+<div class="help">Tipp: Pfeiltasten ← → do nawigacji. Okładka (Seite 1) jest pojedynczą stroną, dalej rozkładówki.</div>
+
+<script>
+const IMAGES = ["pages/page_0001.jpg", "pages/page_0002.jpg", "pages/page_0003.jpg", "pages/page_0004.jpg", "pages/page_0005.jpg", "pages/page_0006.jpg", "pages/page_0007.jpg", "pages/page_0008.jpg", "pages/page_0009.jpg", "pages/page_0010.jpg", "pages/page_0011.jpg", "pages/page_0012.jpg", "pages/page_0013.jpg", "pages/page_0014.jpg", "pages/page_0015.jpg", "pages/page_0016.jpg", "pages/page_0017.jpg", "pages/page_0018.jpg", "pages/page_0019.jpg", "pages/page_0020.jpg", "pages/page_0021.jpg", "pages/page_0022.jpg", "pages/page_0023.jpg", "pages/page_0024.jpg", "pages/page_0025.jpg", "pages/page_0026.jpg", "pages/page_0027.jpg", "pages/page_0028.jpg", "pages/page_0029.jpg", "pages/page_0030.jpg", "pages/page_0031.jpg", "pages/page_0032.jpg", "pages/page_0033.jpg", "pages/page_0034.jpg", "pages/page_0035.jpg", "pages/page_0036.jpg", "pages/page_0037.jpg", "pages/page_0038.jpg", "pages/page_0039.jpg", "pages/page_0040.jpg", "pages/page_0041.jpg", "pages/page_0042.jpg", "pages/page_0043.jpg", "pages/page_0044.jpg", "pages/page_0045.jpg", "pages/page_0046.jpg", "pages/page_0047.jpg", "pages/page_0048.jpg", "pages/page_0049.jpg", "pages/page_0050.jpg", "pages/page_0051.jpg", "pages/page_0052.jpg", "pages/page_0053.jpg", "pages/page_0054.jpg", "pages/page_0055.jpg", "pages/page_0056.jpg", "pages/page_0057.jpg", "pages/page_0058.jpg", "pages/page_0059.jpg", "pages/page_0060.jpg", "pages/page_0061.jpg", "pages/page_0062.jpg", "pages/page_0063.jpg", "pages/page_0064.jpg", "pages/page_0065.jpg", "pages/page_0066.jpg", "pages/page_0067.jpg", "pages/page_0068.jpg", "pages/page_0069.jpg", "pages/page_0070.jpg", "pages/page_0071.jpg", "pages/page_0072.jpg", "pages/page_0073.jpg", "pages/page_0074.jpg", "pages/page_0075.jpg", "pages/page_0076.jpg", "pages/page_0077.jpg", "pages/page_0078.jpg", "pages/page_0079.jpg", "pages/page_0080.jpg", "pages/page_0081.jpg", "pages/page_0082.jpg", "pages/page_0083.jpg", "pages/page_0084.jpg", "pages/page_0085.jpg", "pages/page_0086.jpg", "pages/page_0087.jpg", "pages/page_0088.jpg", "pages/page_0089.jpg", "pages/page_0090.jpg", "pages/page_0091.jpg", "pages/page_0092.jpg", "pages/page_0093.jpg", "pages/page_0094.jpg", "pages/page_0095.jpg", "pages/page_0096.jpg", "pages/page_0097.jpg", "pages/page_0098.jpg", "pages/page_0099.jpg", "pages/page_0100.jpg", "pages/page_0101.jpg", "pages/page_0102.jpg", "pages/page_0103.jpg", "pages/page_0104.jpg", "pages/page_0105.jpg", "pages/page_0106.jpg", "pages/page_0107.jpg", "pages/page_0108.jpg", "pages/page_0109.jpg", "pages/page_0110.jpg", "pages/page_0111.jpg", "pages/page_0112.jpg", "pages/page_0113.jpg", "pages/page_0114.jpg", "pages/page_0115.jpg", "pages/page_0116.jpg", "pages/page_0117.jpg", "pages/page_0118.jpg", "pages/page_0119.jpg", "pages/page_0120.jpg", "pages/page_0121.jpg", "pages/page_0122.jpg", "pages/page_0123.jpg", "pages/page_0124.jpg", "pages/page_0125.jpg", "pages/page_0126.jpg", "pages/page_0127.jpg", "pages/page_0128.jpg", "pages/page_0129.jpg", "pages/page_0130.jpg", "pages/page_0131.jpg", "pages/page_0132.jpg", "pages/page_0133.jpg", "pages/page_0134.jpg", "pages/page_0135.jpg", "pages/page_0136.jpg", "pages/page_0137.jpg", "pages/page_0138.jpg", "pages/page_0139.jpg", "pages/page_0140.jpg"];
+const THUMBS = ["thumbs/thumb_0001.jpg", "thumbs/thumb_0002.jpg", "thumbs/thumb_0003.jpg", "thumbs/thumb_0004.jpg", "thumbs/thumb_0005.jpg", "thumbs/thumb_0006.jpg", "thumbs/thumb_0007.jpg", "thumbs/thumb_0008.jpg", "thumbs/thumb_0009.jpg", "thumbs/thumb_0010.jpg", "thumbs/thumb_0011.jpg", "thumbs/thumb_0012.jpg", "thumbs/thumb_0013.jpg", "thumbs/thumb_0014.jpg", "thumbs/thumb_0015.jpg", "thumbs/thumb_0016.jpg", "thumbs/thumb_0017.jpg", "thumbs/thumb_0018.jpg", "thumbs/thumb_0019.jpg", "thumbs/thumb_0020.jpg", "thumbs/thumb_0021.jpg", "thumbs/thumb_0022.jpg", "thumbs/thumb_0023.jpg", "thumbs/thumb_0024.jpg", "thumbs/thumb_0025.jpg", "thumbs/thumb_0026.jpg", "thumbs/thumb_0027.jpg", "thumbs/thumb_0028.jpg", "thumbs/thumb_0029.jpg", "thumbs/thumb_0030.jpg", "thumbs/thumb_0031.jpg", "thumbs/thumb_0032.jpg", "thumbs/thumb_0033.jpg", "thumbs/thumb_0034.jpg", "thumbs/thumb_0035.jpg", "thumbs/thumb_0036.jpg", "thumbs/thumb_0037.jpg", "thumbs/thumb_0038.jpg", "thumbs/thumb_0039.jpg", "thumbs/thumb_0040.jpg", "thumbs/thumb_0041.jpg", "thumbs/thumb_0042.jpg", "thumbs/thumb_0043.jpg", "thumbs/thumb_0044.jpg", "thumbs/thumb_0045.jpg", "thumbs/thumb_0046.jpg", "thumbs/thumb_0047.jpg", "thumbs/thumb_0048.jpg", "thumbs/thumb_0049.jpg", "thumbs/thumb_0050.jpg", "thumbs/thumb_0051.jpg", "thumbs/thumb_0052.jpg", "thumbs/thumb_0053.jpg", "thumbs/thumb_0054.jpg", "thumbs/thumb_0055.jpg", "thumbs/thumb_0056.jpg", "thumbs/thumb_0057.jpg", "thumbs/thumb_0058.jpg", "thumbs/thumb_0059.jpg", "thumbs/thumb_0060.jpg", "thumbs/thumb_0061.jpg", "thumbs/thumb_0062.jpg", "thumbs/thumb_0063.jpg", "thumbs/thumb_0064.jpg", "thumbs/thumb_0065.jpg", "thumbs/thumb_0066.jpg", "thumbs/thumb_0067.jpg", "thumbs/thumb_0068.jpg", "thumbs/thumb_0069.jpg", "thumbs/thumb_0070.jpg", "thumbs/thumb_0071.jpg", "thumbs/thumb_0072.jpg", "thumbs/thumb_0073.jpg", "thumbs/thumb_0074.jpg", "thumbs/thumb_0075.jpg", "thumbs/thumb_0076.jpg", "thumbs/thumb_0077.jpg", "thumbs/thumb_0078.jpg", "thumbs/thumb_0079.jpg", "thumbs/thumb_0080.jpg", "thumbs/thumb_0081.jpg", "thumbs/thumb_0082.jpg", "thumbs/thumb_0083.jpg", "thumbs/thumb_0084.jpg", "thumbs/thumb_0085.jpg", "thumbs/thumb_0086.jpg", "thumbs/thumb_0087.jpg", "thumbs/thumb_0088.jpg", "thumbs/thumb_0089.jpg", "thumbs/thumb_0090.jpg", "thumbs/thumb_0091.jpg", "thumbs/thumb_0092.jpg", "thumbs/thumb_0093.jpg", "thumbs/thumb_0094.jpg", "thumbs/thumb_0095.jpg", "thumbs/thumb_0096.jpg", "thumbs/thumb_0097.jpg", "thumbs/thumb_0098.jpg", "thumbs/thumb_0099.jpg", "thumbs/thumb_0100.jpg", "thumbs/thumb_0101.jpg", "thumbs/thumb_0102.jpg", "thumbs/thumb_0103.jpg", "thumbs/thumb_0104.jpg", "thumbs/thumb_0105.jpg", "thumbs/thumb_0106.jpg", "thumbs/thumb_0107.jpg", "thumbs/thumb_0108.jpg", "thumbs/thumb_0109.jpg", "thumbs/thumb_0110.jpg", "thumbs/thumb_0111.jpg", "thumbs/thumb_0112.jpg", "thumbs/thumb_0113.jpg", "thumbs/thumb_0114.jpg", "thumbs/thumb_0115.jpg", "thumbs/thumb_0116.jpg", "thumbs/thumb_0117.jpg", "thumbs/thumb_0118.jpg", "thumbs/thumb_0119.jpg", "thumbs/thumb_0120.jpg", "thumbs/thumb_0121.jpg", "thumbs/thumb_0122.jpg", "thumbs/thumb_0123.jpg", "thumbs/thumb_0124.jpg", "thumbs/thumb_0125.jpg", "thumbs/thumb_0126.jpg", "thumbs/thumb_0127.jpg", "thumbs/thumb_0128.jpg", "thumbs/thumb_0129.jpg", "thumbs/thumb_0130.jpg", "thumbs/thumb_0131.jpg", "thumbs/thumb_0132.jpg", "thumbs/thumb_0133.jpg", "thumbs/thumb_0134.jpg", "thumbs/thumb_0135.jpg", "thumbs/thumb_0136.jpg", "thumbs/thumb_0137.jpg", "thumbs/thumb_0138.jpg", "thumbs/thumb_0139.jpg", "thumbs/thumb_0140.jpg"];
+const total = IMAGES.length;
+
+let index = 0; // 0-based current page
+const stage = document.getElementById('stage');
+const imgL = document.getElementById('img-left');
+const imgR = document.getElementById('img-right');
+const rightSlot = document.getElementById('right-slot');
+const info = document.getElementById('info');
+const thumbsWrap = document.getElementById('thumbs');
+
+function render() {
+  // Cover single, spreads afterwards (1&2), (3&4), etc.
+  if (index === 0) {
+    stage.classList.add('single');
+    rightSlot.style.display = 'none';
+    imgL.src = IMAGES[0];
+    imgL.alt = 'Seite 1';
+  } else {
+    stage.classList.remove('single');
+    rightSlot.style.display = '';
+    // compute left page = even index? We want (2,3) as first spread visually after cover.
+    // With 0-based index, after cover (index>=1): left = index, right = index+1 (if exists)
+    const left = index;
+    const right = index + 1 < total ? index + 1 : null;
+    imgL.src = IMAGES[left];
+    imgL.alt = 'Seite ' + (left+1);
+    if (right !== null) {
+      imgR.src = IMAGES[right];
+      imgR.alt = 'Seite ' + (right+1);
+      rightSlot.style.display = '';
+    } else {
+      imgR.removeAttribute('src');
+      imgR.alt = '';
+      rightSlot.style.display = 'none';
+    }
+  }
+  info.textContent = 'Seite ' + (index+1) + ' / ' + total;
+  updateThumbsActive();
+}
+
+function next() {
+  if (index === 0) index = 1; // go from cover to first spread
+  else index = Math.min(total-1, index + 2); // jump by spreads
+  render();
+}
+function prev() {
+  if (index === 1) index = 0; // return to cover
+  else index = Math.max(1, index - 2); // move by spreads
+  render();
+}
+
+document.getElementById('next').addEventListener('click', next);
+document.getElementById('prev').addEventListener('click', prev);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') next();
+  if (e.key === 'ArrowLeft') prev();
+});
+
+// Thumbs
+function updateThumbsActive() {
+  [...thumbsWrap.querySelectorAll('img')].forEach((el,i) => {
+    el.classList.toggle('active', i === index);
+  });
+}
+THUMBS.forEach((src, i) => {
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Miniatur Seite ' + (i+1);
+  img.addEventListener('click', () => {
+    index = i === 0 ? 0 : (i % 2 === 0 ? i : i-1); // snap to spread left page except cover
+    render();
+  });
+  thumbsWrap.appendChild(img);
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DTV_Jahrbuch 2025_eBook</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/page-flip/dist/css/page-flip.css">
+<style>
+  body {
+    margin: 0; padding: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #111; color: #eee; display: flex; flex-direction: column; min-height: 100vh;
+  }
+  header {
+    padding: 10px 16px; background: #1b1b1b; border-bottom: 1px solid #222; display: flex; align-items: center; gap: 12px;
+  }
+  header h1 {
+    font-size: 16px; margin: 0; font-weight: 600; letter-spacing: .3px;
+  }
+  .wrap {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px; gap: 10px;
+  }
+  #flipbook-container {
+    position: relative; width: min(95vw, 1200px); height: calc(min(95vw, 1200px) * 0.707);
+    margin: 0 auto; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,.5);
+  }
+  .controls {
+    display: flex; align-items: center; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  button {
+    border: 1px solid #333; background: #1c1c1c; color: #eee; padding: 8px 12px; border-radius: 6px;
+    cursor: pointer; font-size: 14px;
+  }
+  button:hover { background: #2a2a2a; }
+  .thumbs {
+    display: flex; gap: 6px; overflow-x: auto; padding: 8px; background: #0f0f0f; border-top: 1px solid #222;
+  }
+  .thumbs img {
+    height: 80px; width: auto; display: block; border-radius: 4px; cursor: pointer; opacity: .85;
+    border: 2px solid transparent;
+  }
+  .thumbs img.active { opacity: 1; border-color: #4aa3ff; }
+  .footer {
+    color: #bbb; font-size: 12px; text-align: center; padding: 8px 0 14px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>DTV_Jahrbuch 2025_eBook</h1>
+  </header>
+
+  <div class="wrap">
+    <div id="flipbook-container"></div>
+    <div class="controls">
+      <button id="btn-prev" aria-label="Vorherige Seite">◀︎</button>
+      <span id="page-info" aria-live="polite">Seite 1 / 140</span>
+      <button id="btn-next" aria-label="Nächste Seite">▶︎</button>
+    </div>
+  </div>
+
+  <div class="thumbs" id="thumbs"></div>
+  <div class="footer">Cover ist eine Einzelseite, danach Doppelseiten. Pfeile und Miniaturen aktiv.</div>
+
+<script src="https://unpkg.com/page-flip/dist/js/page-flip.browser.min.js"></script>
+<script>
+  const images = ["pages/page_0001.jpg", "pages/page_0002.jpg", "pages/page_0003.jpg", "pages/page_0004.jpg", "pages/page_0005.jpg", "pages/page_0006.jpg", "pages/page_0007.jpg", "pages/page_0008.jpg", "pages/page_0009.jpg", "pages/page_0010.jpg", "pages/page_0011.jpg", "pages/page_0012.jpg", "pages/page_0013.jpg", "pages/page_0014.jpg", "pages/page_0015.jpg", "pages/page_0016.jpg", "pages/page_0017.jpg", "pages/page_0018.jpg", "pages/page_0019.jpg", "pages/page_0020.jpg", "pages/page_0021.jpg", "pages/page_0022.jpg", "pages/page_0023.jpg", "pages/page_0024.jpg", "pages/page_0025.jpg", "pages/page_0026.jpg", "pages/page_0027.jpg", "pages/page_0028.jpg", "pages/page_0029.jpg", "pages/page_0030.jpg", "pages/page_0031.jpg", "pages/page_0032.jpg", "pages/page_0033.jpg", "pages/page_0034.jpg", "pages/page_0035.jpg", "pages/page_0036.jpg", "pages/page_0037.jpg", "pages/page_0038.jpg", "pages/page_0039.jpg", "pages/page_0040.jpg", "pages/page_0041.jpg", "pages/page_0042.jpg", "pages/page_0043.jpg", "pages/page_0044.jpg", "pages/page_0045.jpg", "pages/page_0046.jpg", "pages/page_0047.jpg", "pages/page_0048.jpg", "pages/page_0049.jpg", "pages/page_0050.jpg", "pages/page_0051.jpg", "pages/page_0052.jpg", "pages/page_0053.jpg", "pages/page_0054.jpg", "pages/page_0055.jpg", "pages/page_0056.jpg", "pages/page_0057.jpg", "pages/page_0058.jpg", "pages/page_0059.jpg", "pages/page_0060.jpg", "pages/page_0061.jpg", "pages/page_0062.jpg", "pages/page_0063.jpg", "pages/page_0064.jpg", "pages/page_0065.jpg", "pages/page_0066.jpg", "pages/page_0067.jpg", "pages/page_0068.jpg", "pages/page_0069.jpg", "pages/page_0070.jpg", "pages/page_0071.jpg", "pages/page_0072.jpg", "pages/page_0073.jpg", "pages/page_0074.jpg", "pages/page_0075.jpg", "pages/page_0076.jpg", "pages/page_0077.jpg", "pages/page_0078.jpg", "pages/page_0079.jpg", "pages/page_0080.jpg", "pages/page_0081.jpg", "pages/page_0082.jpg", "pages/page_0083.jpg", "pages/page_0084.jpg", "pages/page_0085.jpg", "pages/page_0086.jpg", "pages/page_0087.jpg", "pages/page_0088.jpg", "pages/page_0089.jpg", "pages/page_0090.jpg", "pages/page_0091.jpg", "pages/page_0092.jpg", "pages/page_0093.jpg", "pages/page_0094.jpg", "pages/page_0095.jpg", "pages/page_0096.jpg", "pages/page_0097.jpg", "pages/page_0098.jpg", "pages/page_0099.jpg", "pages/page_0100.jpg", "pages/page_0101.jpg", "pages/page_0102.jpg", "pages/page_0103.jpg", "pages/page_0104.jpg", "pages/page_0105.jpg", "pages/page_0106.jpg", "pages/page_0107.jpg", "pages/page_0108.jpg", "pages/page_0109.jpg", "pages/page_0110.jpg", "pages/page_0111.jpg", "pages/page_0112.jpg", "pages/page_0113.jpg", "pages/page_0114.jpg", "pages/page_0115.jpg", "pages/page_0116.jpg", "pages/page_0117.jpg", "pages/page_0118.jpg", "pages/page_0119.jpg", "pages/page_0120.jpg", "pages/page_0121.jpg", "pages/page_0122.jpg", "pages/page_0123.jpg", "pages/page_0124.jpg", "pages/page_0125.jpg", "pages/page_0126.jpg", "pages/page_0127.jpg", "pages/page_0128.jpg", "pages/page_0129.jpg", "pages/page_0130.jpg", "pages/page_0131.jpg", "pages/page_0132.jpg", "pages/page_0133.jpg", "pages/page_0134.jpg", "pages/page_0135.jpg", "pages/page_0136.jpg", "pages/page_0137.jpg", "pages/page_0138.jpg", "pages/page_0139.jpg", "pages/page_0140.jpg"];
+  const thumbs = ["thumbs/thumb_0001.jpg", "thumbs/thumb_0002.jpg", "thumbs/thumb_0003.jpg", "thumbs/thumb_0004.jpg", "thumbs/thumb_0005.jpg", "thumbs/thumb_0006.jpg", "thumbs/thumb_0007.jpg", "thumbs/thumb_0008.jpg", "thumbs/thumb_0009.jpg", "thumbs/thumb_0010.jpg", "thumbs/thumb_0011.jpg", "thumbs/thumb_0012.jpg", "thumbs/thumb_0013.jpg", "thumbs/thumb_0014.jpg", "thumbs/thumb_0015.jpg", "thumbs/thumb_0016.jpg", "thumbs/thumb_0017.jpg", "thumbs/thumb_0018.jpg", "thumbs/thumb_0019.jpg", "thumbs/thumb_0020.jpg", "thumbs/thumb_0021.jpg", "thumbs/thumb_0022.jpg", "thumbs/thumb_0023.jpg", "thumbs/thumb_0024.jpg", "thumbs/thumb_0025.jpg", "thumbs/thumb_0026.jpg", "thumbs/thumb_0027.jpg", "thumbs/thumb_0028.jpg", "thumbs/thumb_0029.jpg", "thumbs/thumb_0030.jpg", "thumbs/thumb_0031.jpg", "thumbs/thumb_0032.jpg", "thumbs/thumb_0033.jpg", "thumbs/thumb_0034.jpg", "thumbs/thumb_0035.jpg", "thumbs/thumb_0036.jpg", "thumbs/thumb_0037.jpg", "thumbs/thumb_0038.jpg", "thumbs/thumb_0039.jpg", "thumbs/thumb_0040.jpg", "thumbs/thumb_0041.jpg", "thumbs/thumb_0042.jpg", "thumbs/thumb_0043.jpg", "thumbs/thumb_0044.jpg", "thumbs/thumb_0045.jpg", "thumbs/thumb_0046.jpg", "thumbs/thumb_0047.jpg", "thumbs/thumb_0048.jpg", "thumbs/thumb_0049.jpg", "thumbs/thumb_0050.jpg", "thumbs/thumb_0051.jpg", "thumbs/thumb_0052.jpg", "thumbs/thumb_0053.jpg", "thumbs/thumb_0054.jpg", "thumbs/thumb_0055.jpg", "thumbs/thumb_0056.jpg", "thumbs/thumb_0057.jpg", "thumbs/thumb_0058.jpg", "thumbs/thumb_0059.jpg", "thumbs/thumb_0060.jpg", "thumbs/thumb_0061.jpg", "thumbs/thumb_0062.jpg", "thumbs/thumb_0063.jpg", "thumbs/thumb_0064.jpg", "thumbs/thumb_0065.jpg", "thumbs/thumb_0066.jpg", "thumbs/thumb_0067.jpg", "thumbs/thumb_0068.jpg", "thumbs/thumb_0069.jpg", "thumbs/thumb_0070.jpg", "thumbs/thumb_0071.jpg", "thumbs/thumb_0072.jpg", "thumbs/thumb_0073.jpg", "thumbs/thumb_0074.jpg", "thumbs/thumb_0075.jpg", "thumbs/thumb_0076.jpg", "thumbs/thumb_0077.jpg", "thumbs/thumb_0078.jpg", "thumbs/thumb_0079.jpg", "thumbs/thumb_0080.jpg", "thumbs/thumb_0081.jpg", "thumbs/thumb_0082.jpg", "thumbs/thumb_0083.jpg", "thumbs/thumb_0084.jpg", "thumbs/thumb_0085.jpg", "thumbs/thumb_0086.jpg", "thumbs/thumb_0087.jpg", "thumbs/thumb_0088.jpg", "thumbs/thumb_0089.jpg", "thumbs/thumb_0090.jpg", "thumbs/thumb_0091.jpg", "thumbs/thumb_0092.jpg", "thumbs/thumb_0093.jpg", "thumbs/thumb_0094.jpg", "thumbs/thumb_0095.jpg", "thumbs/thumb_0096.jpg", "thumbs/thumb_0097.jpg", "thumbs/thumb_0098.jpg", "thumbs/thumb_0099.jpg", "thumbs/thumb_0100.jpg", "thumbs/thumb_0101.jpg", "thumbs/thumb_0102.jpg", "thumbs/thumb_0103.jpg", "thumbs/thumb_0104.jpg", "thumbs/thumb_0105.jpg", "thumbs/thumb_0106.jpg", "thumbs/thumb_0107.jpg", "thumbs/thumb_0108.jpg", "thumbs/thumb_0109.jpg", "thumbs/thumb_0110.jpg", "thumbs/thumb_0111.jpg", "thumbs/thumb_0112.jpg", "thumbs/thumb_0113.jpg", "thumbs/thumb_0114.jpg", "thumbs/thumb_0115.jpg", "thumbs/thumb_0116.jpg", "thumbs/thumb_0117.jpg", "thumbs/thumb_0118.jpg", "thumbs/thumb_0119.jpg", "thumbs/thumb_0120.jpg", "thumbs/thumb_0121.jpg", "thumbs/thumb_0122.jpg", "thumbs/thumb_0123.jpg", "thumbs/thumb_0124.jpg", "thumbs/thumb_0125.jpg", "thumbs/thumb_0126.jpg", "thumbs/thumb_0127.jpg", "thumbs/thumb_0128.jpg", "thumbs/thumb_0129.jpg", "thumbs/thumb_0130.jpg", "thumbs/thumb_0131.jpg", "thumbs/thumb_0132.jpg", "thumbs/thumb_0133.jpg", "thumbs/thumb_0134.jpg", "thumbs/thumb_0135.jpg", "thumbs/thumb_0136.jpg", "thumbs/thumb_0137.jpg", "thumbs/thumb_0138.jpg", "thumbs/thumb_0139.jpg", "thumbs/thumb_0140.jpg"];
+
+  const container = document.getElementById('flipbook-container');
+  const pageFlip = new St.PageFlip(container, {
+    width: 800,
+    height: 566,
+    size: "stretch",
+    minWidth: 320,
+    minHeight: 240,
+    maxWidth: 2000,
+    maxHeight: 1400,
+    showCover: true,
+    mobileScrollSupport: true,
+    disableFlipByClick: false,
+    usePortrait: false,
+    startPage: 0
+  });
+
+  pageFlip.loadFromImages(images);
+
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const pageInfo = document.getElementById('page-info');
+  const thumbsWrap = document.getElementById('thumbs');
+
+  function updateInfo() {
+    const state = pageFlip.getState();
+    pageInfo.textContent = `Seite ${state.page + 1} / 140`;
+    [...thumbsWrap.querySelectorAll('img')].forEach((el, i) => {
+      el.classList.toggle('active', i === state.page);
+    });
+  }
+
+  btnPrev.addEventListener('click', () => pageFlip.flipPrev());
+  btnNext.addEventListener('click', () => pageFlip.flipNext());
+  pageFlip.on('flip', updateInfo);
+  pageFlip.on('init', updateInfo);
+
+  thumbs.forEach((src, i) => {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `Miniatur: Seite ${i+1}`;
+    img.addEventListener('click', () => pageFlip.flip(i));
+    thumbsWrap.appendChild(img);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DTV_Jahrbuch 2025_eBook – flip (offline)</title>
+<style>
+  :root{--bg:#0f0f10;--fg:#eaeaea;--muted:#a0a0a0;--accent:#4aa3ff}
+  *{box-sizing:border-box}html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column}
+  header{background:#151515;border-bottom:1px solid #232323;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+  header h1{font-size:16px;margin:0;font-weight:600}
+  .stage{flex:1;display:grid;place-items:center;padding:10px}
+  .book{width:min(96vw,1400px);height:calc(min(96vw,1400px)*0.707);position:relative;perspective:2000px;background:#000;border-radius:6px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  .spread{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr}
+  .spread.single{grid-template-columns:1fr}
+  .page{display:grid;place-items:center;overflow:hidden;background:#000}
+  .page img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+  .flip{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;pointer-events:none;transform-style:preserve-3d}
+  .flip .pane{background:#000;transform-origin:left center;backface-visibility:hidden}
+  .flip.run .pane{animation:flip 650ms ease-in-out forwards}
+  @keyframes flip{0%{transform:rotateY(0)}49%{transform:rotateY(-89deg)}50%{transform:rotateY(89deg)}100%{transform:rotateY(0)}}
+  .controls{display:flex;gap:8px;justify-content:center;padding:8px}
+  button{border:1px solid #333;background:#1c1c1c;color:#eee;padding:8px 12px;border-radius:6px;cursor:pointer}
+  button:hover{background:#262626}
+  .thumbs{display:flex;gap:6px;overflow-x:auto;padding:8px;background:#0f0f0f;border-top:1px solid #232323}
+  .thumbs img{height:70px;border-radius:4px;cursor:pointer;opacity:.85;border:2px solid transparent}
+  .thumbs img.active{opacity:1;border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header><h1>DTV_Jahrbuch 2025_eBook</h1><div id="info"></div></header>
+<div class="stage">
+  <div class="book">
+    <div class="spread single" id="spread">
+      <div class="page"><img id="imgL" alt=""></div>
+      <div class="page" id="rightSlot" style="display:none"><img id="imgR" alt=""></div>
+    </div>
+    <div class="flip" id="flip" style="display:none"><div class="pane"><img id="flipImg" alt=""></div></div>
+  </div>
+</div>
+<div class="controls">
+  <button id="prev">◀︎ Zurück</button>
+  <span id="pi"></span>
+  <button id="next">▶︎ Weiter</button>
+</div>
+<div class="thumbs" id="thumbs"></div>
+
+<script>
+// 🔧 USTAW: ile masz stron
+const COUNT = 140;
+
+// najpierw próbujemy pages/, jak 404 to root
+function pad(n){return String(n).padStart(4,'0')}
+function srcBig(n){const s=pad(n);return [`pages/page_${s}.jpg`,`page_${s}.jpg`]}
+function srcTh(n){const s=pad(n);return [`thumbs/thumb_${s}.jpg`,`thumb_${s}.jpg`]}
+function loadTry(img, arr){return new Promise(res=>{let i=0;const go=()=>{if(i>=arr.length){res(false);return}img.onload=()=>res(true);img.onerror=()=>{i++;go()};img.src=arr[i]};go()})}
+
+let idx=1;
+const spread=document.getElementById('spread');
+const imgL=document.getElementById('imgL');
+const imgR=document.getElementById('imgR');
+const rightSlot=document.getElementById('rightSlot');
+const flip=document.getElementById('flip');
+const flipImg=document.getElementById('flipImg');
+const info=document.getElementById('info');
+const pi=document.getElementById('pi');
+const thumbs=document.getElementById('thumbs');
+
+async function render(noAnim=false){
+  if(idx===1){
+    spread.classList.add('single'); rightSlot.style.display='none';
+    await loadTry(imgL, srcBig(1));
+  }else{
+    spread.classList.remove('single'); rightSlot.style.display='';
+    const L=idx, R=idx+1<=COUNT?idx+1:null;
+    await loadTry(imgL, srcBig(L));
+    if(R){ await loadTry(imgR, srcBig(R)); rightSlot.style.display=''; }
+    else { imgR.removeAttribute('src'); rightSlot.style.display='none'; }
+  }
+  info.textContent=`Seite ${idx} / ${COUNT}`;
+  pi.textContent = `Seite ${idx} / ${COUNT}`;
+  [...thumbs.querySelectorAll('img')].forEach((el,i)=>el.classList.toggle('active', i+1===idx));
+  if(!noAnim){ flip.style.display=''; flip.classList.remove('run'); flipImg.src=imgL.src; void flip.offsetWidth; flip.classList.add('run'); setTimeout(()=>flip.style.display='none',700); }
+}
+function next(){ idx = (idx===1)?2:Math.min(COUNT- (COUNT%2?0:1), idx+2); render() }
+function prev(){ idx = (idx===2)?1:Math.max(2, idx-2); render() }
+
+document.getElementById('next').onclick=next;
+document.getElementById('prev').onclick=prev;
+window.addEventListener('keydown',e=>{ if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); });
+
+// miniatury
+(async function(){
+  for(let i=1;i<=COUNT;i++){
+    const t=new Image(); const [a,b]=srcTh(i);
+    t.onload=()=>{}; t.onerror=()=>{ t.src=b };
+    t.src=a; t.alt='Seite '+i; t.onclick=()=>{ idx = (i===1)?1 : (i%2===0?i:i-1); render() };
+    thumbs.appendChild(t);
+  }
+  await render(true);
+})();
+</script>
+</body></html>

@@ -64,6 +64,7 @@
 <div class="controls">
   <button id="prev" aria-label="Vorherige Seite">◀︎ Zurück</button>
   <span id="pi" aria-live="polite"></span>
+  <input id="pageInput" type="number" min="1" style="width:60px" aria-label="Seitenzahl">
   <button id="next" aria-label="Nächste Seite">▶︎ Weiter</button>
 </div>
 <div class="thumbs" id="thumbs"></div>
@@ -96,6 +97,8 @@ const flipShade=document.getElementById('flipShade');
 const info=document.getElementById('info');
 const pi=document.getElementById('pi');
 const thumbs=document.getElementById('thumbs');
+const pageInput=document.getElementById('pageInput');
+pageInput.max = COUNT;
 
 /* dopasuj wysokość „książki” do proporcji obrazów (koniec z ucianiem okładki) */
 function setBookHeightFor(img, columns){
@@ -140,6 +143,8 @@ async function render(noAnim=false){
   info.textContent = `Seite ${idx} / ${COUNT}`;
   pi.textContent   = `Seite ${idx} / ${COUNT}`;
   [...thumbs.querySelectorAll('img')].forEach((el,i)=>el.classList.toggle('active', i+1===idx));
+  pageInput.value = idx;
+  location.hash = 'p='+idx;
 
   if(!noAnim) runFlip();
 }
@@ -182,6 +187,13 @@ function prev(){
 document.getElementById('next').onclick = next;
 document.getElementById('prev').onclick = prev;
 window.addEventListener('keydown', e=>{ if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); });
+pageInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){
+    const n=parseInt(pageInput.value,10);
+    if(n>=1 && n<=COUNT){ idx = (n===1)?1:(n%2===0?n:n-1); render(true); }
+    else { pageInput.value=idx; }
+  }
+});
 
 /* MINIATURY */
 (function(){
@@ -195,6 +207,11 @@ window.addEventListener('keydown', e=>{ if(e.key==='ArrowRight') next(); if(e.ke
 })();
 
 /* START */
+const match = location.hash.match(/p=(\d+)/);
+if(match){
+  const n=parseInt(match[1],10);
+  if(n>=1 && n<=COUNT){ idx = (n===1)?1:(n%2===0?n:n-1); }
+}
 render(true);
 window.addEventListener('resize', ()=>{ placeFlipOverRight(); }); // utrzymaj pozycję klona przy zmianie rozmiaru
 </script>

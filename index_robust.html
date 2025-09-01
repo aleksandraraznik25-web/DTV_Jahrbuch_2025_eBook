@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DTV_Jahrbuch 2025_eBook – robust</title>
+<style>
+  body{margin:0;background:#111;color:#eee;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;min-height:100vh}
+  header{padding:10px 16px;background:#1b1b1b;border-bottom:1px solid #222;display:flex;align-items:center;gap:12px}
+  header h1{font-size:16px;margin:0;font-weight:600}
+  .wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px}
+  #stage{position:relative;width:min(95vw,1200px);height:calc(min(95vw,1200px)*0.707);background:#000;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .controls{display:flex;gap:8px;justify-content:center}
+  button{border:1px solid #333;background:#1c1c1c;color:#eee;padding:8px 12px;border-radius:6px;cursor:pointer}
+  .thumbs{display:flex;gap:6px;overflow-x:auto;padding:8px;background:#0f0f0f;border-top:1px solid #222}
+  .thumbs img{height:80px;border-radius:4px;cursor:pointer;opacity:.85;border:2px solid transparent}
+  .thumbs img.active{opacity:1;border-color:#4aa3ff}
+  img.full{width:100%;height:100%;object-fit:contain;display:block}
+</style>
+</head>
+<body>
+<header><h1>DTV_Jahrbuch 2025_eBook</h1><span id="info"></span></header>
+<div class="wrap">
+  <div id="stage"><img id="page" class="full" alt=""></div>
+  <div class="controls">
+    <button id="prev">◀︎</button>
+    <span id="pi"></span>
+    <button id="next">▶︎</button>
+  </div>
+</div>
+<div class="thumbs" id="thumbs"></div>
+
+<script>
+// USTAWIENIA
+const COUNT = 140;                 // liczba stron
+const bigPrefix1 = 'pages/page_';  // pierwsza próba (foldery)
+const bigPrefix2 = 'page_';        // druga próba (pliki w katalogu głównym)
+const thPrefix1  = 'thumbs/thumb_';
+const thPrefix2  = 'thumb_';
+
+function name(n){return String(n).padStart(4,'0')}
+function tryLoad(img, a, b){ // najpierw A, jeśli 404 -> B
+  return new Promise(res=>{
+    img.onload = ()=>res(img.src);
+    img.onerror = ()=>{
+      img.onerror = ()=>res(null);
+      img.src = b;
+    };
+    img.src = a;
+  });
+}
+
+let index=1; // strony liczone od 1
+const page = document.getElementById('page');
+const info = document.getElementById('info');
+const pi   = document.getElementById('pi');
+const thumbs = document.getElementById('thumbs');
+
+async function show(i){
+  index = Math.max(1, Math.min(COUNT, i));
+  info.textContent = `Seite ${index} / ${COUNT}`;
+  pi.textContent   = `Seite ${index} / ${COUNT}`;
+  const nn = name(index);
+  await tryLoad(page,
+    `${bigPrefix1}${nn}.jpg`,
+    `${bigPrefix2}${nn}.jpg`
+  );
+  [...thumbs.querySelectorAll('img')].forEach((el,k)=>{
+    el.classList.toggle('active', k+1===index);
+  });
+}
+
+document.getElementById('prev').onclick=()=>show(index-1);
+document.getElementById('next').onclick=()=>show(index+1);
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft') show(index-1);
+  if(e.key==='ArrowRight') show(index+1);
+});
+
+// miniatury
+(async function initThumbs(){
+  for(let i=1;i<=COUNT;i++){
+    const t=document.createElement('img');
+    const nn=name(i);
+    // spróbuj 1) thumbs/ 2) root
+    const test=new Image();
+    const src1=`${thPrefix1}${nn}.jpg`;
+    const src2=`${thPrefix2}${nn}.jpg`;
+    test.onload=()=>{t.src=src1};
+    test.onerror=()=>{t.src=src2};
+    test.src=src1;
+    t.alt=`Seite ${i}`;
+    t.onclick=()=>show(i);
+    thumbs.appendChild(t);
+  }
+  show(1);
+})();
+</script>
+</body>
+</html>
